@@ -1,0 +1,35 @@
+services:
+  
+  crm:
+    build: ./crmservice/
+    container_name: crm
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:mysql://crm-db:3306/crm?createDatabaseIfNotExist=true&serverTimezone=UTC
+      DB_USERNAME: 'root'
+      DB_PASSWORD: 'kinglouie67'
+      # AWS_ACCESS_KEY: 'XXXXXXXXXXXXXXXXXXXXXXXXX'
+      # AWS_SECRET_KEY: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+      AWS_URL: 'https://s3.eu-north-1.amazonaws.com'
+      AWS_BUCKET_NAME: 'mycustomersapibucket'
+      AWS_REGION: 'eu-north-1'
+      AWS_SECRET_NAME: 'prod/admin-users'
+    depends_on:
+      crm-db:
+        condition: service_healthy
+        
+  crm-db:
+    image: mysql:latest
+    ports: 
+      - "3307:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'crm'
+      MYSQL_USER: 'crmmonkey'
+      MYSQL_PASSWORD: 'mowgli67'
+      MYSQL_ROOT_PASSWORD: 'kinglouie67'
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 3
